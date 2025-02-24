@@ -6,11 +6,20 @@ export const getUserProfile = createAsyncThunk(
     "user/getUserProfile",
     async (body) => {
         try {
-            const response = await axiosClient.post(
-                "/user/getUserProfile",
-                body
-            );
+            const response = await axiosClient.post("/user/getUserProfile", body);
             return response.result;
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
+);
+
+export const fetchPosts = createAsyncThunk(
+    "posts/fetchPosts",
+    async () => {
+        try {
+            const response = await axiosClient.get("/posts");
+            return response.result.posts;
         } catch (error) {
             return Promise.reject(error);
         }
@@ -25,9 +34,10 @@ export const likeAndUnlikePost = createAsyncThunk(
             return response.result.post;
         } catch (error) {
             return Promise.reject(error);
-        } 
+        }
     }
 );
+
 
 const postsSlice = createSlice({
     name: "postsSlice",
@@ -46,10 +56,10 @@ const postsSlice = createSlice({
                     (item) => item._id === post._id
                 );
                 console.log("postslice", index);
-                if (index != undefined && index != -1) {
+                if (index !== undefined && index !== -1) {
                     state.userProfile.posts[index] = post;
                 }
-            });
+            })
     },
 });
 

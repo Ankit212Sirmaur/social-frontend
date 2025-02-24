@@ -9,7 +9,7 @@ function Feed() {
 
   const dispatch = useDispatch();
   const feedData = useSelector(state => state.feedDataReducer.feedData)
-
+  
   useEffect(() => {
     dispatch(getFeedData());
   }, [dispatch])

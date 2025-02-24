@@ -7,7 +7,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import { setLoading } from "../../redux/slices/appConfigSlice";
 import { KEY_ACCESS_TOKEN, removeItem } from "../../utils/localStorageManager";
 import { axiosClient } from "../../utils/axiosClient";
-
+import logoImage from "../../assets/image.png";
 
 function Navbar() {
     const navigate = useNavigate();
@@ -28,7 +28,7 @@ function Navbar() {
         <div className="Navbar">
             <div className="container">
                 <h2 className="banner hover-link" onClick={() => navigate("/")}>
-                    Social Media
+                    <img src= {logoImage} alt="logoImage" />
                 </h2>
                 <div className="right-side">
                     <div

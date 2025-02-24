@@ -1,21 +1,44 @@
-import React from "react";
-import Avatar from "../avatar/Avatar";
-import "./Post.scss";
-import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
-import {useDispatch} from 'react-redux';
-import { likeAndUnlikePost } from "../../redux/slices/postsSlice";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from "react-router";
-import { showToast } from "../../redux/slices/appConfigSlice";
-import { TOAST_SUCCESS } from "../../App";
+import Avatar from "../avatar/Avatar";
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import { likeAndUnlikePost } from "../../redux/slices/postsSlice";
+import { createComment, fetchPostComments, deleteComment } from "../../redux/slices/commentSlice";
+import "./Post.scss";
 
 function Post({ post }) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [newComment, setNewComment] = useState('');
+    const comments = useSelector(state => 
+        state.CommentReducer.commentsByPost[post._id] || []
+    );
+
+    useEffect(() => {
+        dispatch(fetchPostComments(post._id));
+    }, [post._id, dispatch]);
+
     async function handlePostLiked() {
         dispatch(likeAndUnlikePost({
             postId: post._id
-        }))
+        }));
     }
+
+    const handleCommentSubmit = (e) => {
+        e.preventDefault();
+        if (newComment.trim()) {
+            dispatch(createComment({
+                postId: post._id,
+                text: newComment
+            }));
+            setNewComment('');
+        }
+    };
+
+    const handleDeleteComment = (commentId) => {
+        dispatch(deleteComment(commentId));
+    };
 
     return (
         <div className="Post">
@@ -28,11 +51,37 @@ function Post({ post }) {
             </div>
             <div className="footer">
                 <div className="like" onClick={handlePostLiked}>
-                    {post.isLiked ? <AiFillHeart style={{color: 'red'}} className="icon" /> : <AiOutlineHeart className="icon" />}
+                    {post.isLiked ? <AiFillHeart style={{ color: 'red' }} className="icon" /> : <AiOutlineHeart className="icon" />}
                     <h4>{`${post.likesCount} likes`}</h4>
                 </div>
                 <p className="caption">{post.caption}</p>
                 <h6 className="time-ago">{post?.timeAgo}</h6>
+
+                {/* Comment Section */}
+                <div className="comments-section">
+                    <form onSubmit={handleCommentSubmit}>
+                        <input
+                            type="text"
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Add a comment..."
+                        />
+                        <button type="submit">Post</button>
+                    </form>
+
+                    {comments.map(comment => (
+                        <div key={comment._id} className="comment">
+                            <Avatar src={comment.author?.avatar?.url} />
+                            <div className="comment-content">
+                                <p>{comment.author?.name}</p>
+                                <p>{comment.text}</p>
+                                {comment.author?._id === post.owner?._id && (
+                                    <button onClick={() => handleDeleteComment(comment._id)}>Delete</button>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
